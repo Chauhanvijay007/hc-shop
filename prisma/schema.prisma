@@ -112,6 +112,7 @@ model Url {
   sitemapUrl           String?             @db.Text
   monitoringFrequency  MonitoringFrequency @default(daily)
   isActive             Boolean             @default(true)
+  lastCheckedAt        DateTime?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 

@@ -1,114 +1,78 @@
-import { Worker, Job } from 'bullmq'
-import { connection } from '@/lib/queue/connection'
-import { googleURLInspection } from '@/lib/google-api/url-inspection'
-import { prisma } from '@/lib/db/prisma'
+/**
+ * Worker Manager - Phase 2
+ * Starts all background workers and schedulers
+ */
 
-interface UrlInspectionJob {
-  userId: string
-  projectId: string
-  urlId: string
-  url: string
-  siteUrl: string
+import urlInspectionWorker from './url-inspection-worker'
+import bulkCheckWorker from './bulk-check-worker'
+import alertCheckWorker from './alert-check-worker'
+import { startDailyMonitor, stopDailyMonitor, getNextDailyRun } from '@/lib/scheduler/daily-monitor'
+import { startWeeklyMonitor, stopWeeklyMonitor, getNextWeeklyRun } from '@/lib/scheduler/weekly-monitor'
+import { connection } from '@/lib/queue/connection'
+
+console.log('🚀 Starting Indexing Insight Workers...')
+console.log('=====================================')
+
+// List all workers
+const workers = [
+  { name: 'URL Inspection Worker', instance: urlInspectionWorker },
+  { name: 'Bulk Check Worker', instance: bulkCheckWorker },
+  { name: 'Alert Check Worker', instance: alertCheckWorker },
+]
+
+console.log(`\n✅ ${workers.length} workers started:`)
+workers.forEach(w => console.log(`   - ${w.name}`))
+
+// Start schedulers
+console.log('\n📅 Starting schedulers...')
+startDailyMonitor()
+startWeeklyMonitor()
+
+// Log next scheduled runs
+const nextDaily = getNextDailyRun()
+const nextWeekly = getNextWeeklyRun()
+console.log(`   - Daily monitoring: next run at ${nextDaily.toLocaleString()}`)
+console.log(`   - Weekly monitoring: next run at ${nextWeekly.toLocaleString()}`)
+
+console.log('\n✅ All workers and schedulers are running!')
+console.log('=====================================')
+
+/**
+ * Graceful shutdown handler
+ */
+async function shutdown(signal: string) {
+  console.log(`\n${signal} received, shutting down gracefully...`)
+
+  // Stop schedulers
+  console.log('🛑 Stopping schedulers...')
+  stopDailyMonitor()
+  stopWeeklyMonitor()
+
+  // Close all workers
+  console.log('🛑 Closing workers...')
+  await Promise.all(workers.map(w => w.instance.close()))
+
+  // Close Redis connection
+  console.log('🛑 Closing Redis connection...')
+  await connection.quit()
+
+  console.log('✅ Shutdown complete')
+  process.exit(0)
 }
 
-// URL Inspection Worker
-const urlInspectionWorker = new Worker<UrlInspectionJob>(
-  'url-inspection',
-  async (job: Job<UrlInspectionJob>) => {
-    console.log(`Processing URL inspection for: ${job.data.url}`)
+// Handle process signals
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))
 
-    try {
-      // Update queue status to processing
-      await prisma.monitoringQueue.updateMany({
-        where: {
-          urlId: job.data.urlId,
-          status: 'pending',
-        },
-        data: {
-          status: 'processing',
-          startedAt: new Date(),
-        },
-      })
-
-      // Perform the inspection
-      await googleURLInspection.inspectAndStore(
-        job.data.userId,
-        job.data.urlId,
-        job.data.siteUrl,
-        job.data.url
-      )
-
-      // Update queue status to completed
-      await prisma.monitoringQueue.updateMany({
-        where: {
-          urlId: job.data.urlId,
-          status: 'processing',
-        },
-        data: {
-          status: 'completed',
-          completedAt: new Date(),
-        },
-      })
-
-      console.log(`Successfully inspected: ${job.data.url}`)
-      return { success: true, url: job.data.url }
-    } catch (error) {
-      console.error(`Error inspecting URL ${job.data.url}:`, error)
-
-      // Update queue status to failed
-      await prisma.monitoringQueue.updateMany({
-        where: {
-          urlId: job.data.urlId,
-          status: 'processing',
-        },
-        data: {
-          status: 'failed',
-          completedAt: new Date(),
-          errorMessage: error instanceof Error ? error.message : 'Unknown error',
-          retryCount: {
-            increment: 1,
-          },
-        },
-      })
-
-      throw error
-    }
-  },
-  {
-    connection,
-    concurrency: 10, // Process 10 URLs concurrently
-    limiter: {
-      max: 600, // 600 requests
-      duration: 60000, // per minute (Google API limit)
-    },
-  }
-)
-
-urlInspectionWorker.on('completed', (job) => {
-  console.log(`Job ${job.id} completed for URL: ${job.data.url}`)
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error)
+  shutdown('UNCAUGHT_EXCEPTION')
 })
 
-urlInspectionWorker.on('failed', (job, err) => {
-  console.error(`Job ${job?.id} failed for URL: ${job?.data?.url}`, err)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason)
 })
 
-urlInspectionWorker.on('error', (err) => {
-  console.error('Worker error:', err)
-})
-
-console.log('URL Inspection Worker started')
-
-// Handle graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, closing worker...')
-  await urlInspectionWorker.close()
-  await connection.quit()
-  process.exit(0)
-})
-
-process.on('SIGINT', async () => {
-  console.log('SIGINT received, closing worker...')
-  await urlInspectionWorker.close()
-  await connection.quit()
-  process.exit(0)
-})
+// Keep process alive
+process.stdin.resume()
