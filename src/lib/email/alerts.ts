@@ -3,6 +3,8 @@ import {
   generateUrlDroppedEmail,
   generateUrlDroppedEmailText,
   generateBulkDropEmail,
+  generateUrlIndexedEmail,
+  generateErrorDetectedEmail,
 } from './templates'
 import { format } from 'date-fns'
 
@@ -91,6 +93,82 @@ export async function sendBulkDropAlert(data: BulkDropAlertData) {
     return { success: true }
   } catch (error) {
     console.error('Failed to send bulk drop alert:', error)
+    throw error
+  }
+}
+
+interface UrlIndexedAlertData {
+  email: string
+  userName: string
+  projectName: string
+  url: string
+  previousState: string
+  detectedAt: Date
+  projectId: string
+}
+
+export async function sendUrlIndexedAlert(data: UrlIndexedAlertData) {
+  try {
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/projects/${data.projectId}/urls`
+    const formattedDate = format(data.detectedAt, 'PPpp')
+
+    const emailHtml = generateUrlIndexedEmail({
+      userName: data.userName || 'there',
+      projectName: data.projectName,
+      url: data.url,
+      previousState: data.previousState,
+      detectedAt: formattedDate,
+      dashboardUrl,
+    })
+
+    await sendEmail({
+      to: data.email,
+      subject: `✅ URL Now Indexed - ${data.projectName}`,
+      html: emailHtml,
+    })
+
+    console.log(`📧 URL indexed alert sent to ${data.email}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send URL indexed alert:', error)
+    throw error
+  }
+}
+
+interface ErrorDetectedAlertData {
+  email: string
+  userName: string
+  projectName: string
+  url: string
+  errorMessage: string
+  detectedAt: Date
+  projectId: string
+}
+
+export async function sendErrorDetectedAlert(data: ErrorDetectedAlertData) {
+  try {
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/projects/${data.projectId}/urls`
+    const formattedDate = format(data.detectedAt, 'PPpp')
+
+    const emailHtml = generateErrorDetectedEmail({
+      userName: data.userName || 'there',
+      projectName: data.projectName,
+      url: data.url,
+      errorMessage: data.errorMessage,
+      detectedAt: formattedDate,
+      dashboardUrl,
+    })
+
+    await sendEmail({
+      to: data.email,
+      subject: `⚠️ Indexing Error Detected - ${data.projectName}`,
+      html: emailHtml,
+    })
+
+    console.log(`📧 Error detected alert sent to ${data.email}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send error detected alert:', error)
     throw error
   }
 }

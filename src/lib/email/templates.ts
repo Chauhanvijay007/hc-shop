@@ -317,3 +317,274 @@ export function generateBulkDropEmail(data: BulkDropEmailData): string {
 </html>
   `.trim()
 }
+
+interface UrlIndexedEmailData {
+  userName: string
+  projectName: string
+  url: string
+  previousState: string
+  detectedAt: string
+  dashboardUrl: string
+}
+
+export function generateUrlIndexedEmail(data: UrlIndexedEmailData): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Now Indexed</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .email-container {
+      background-color: #ffffff;
+      margin: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .success-box {
+      background-color: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .url-display {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .status-badge {
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      background-color: #d1fae5;
+      color: #065f46;
+      display: inline-block;
+      margin: 10px 0;
+    }
+    .button {
+      display: inline-block;
+      background: #2563eb;
+      color: white !important;
+      padding: 14px 28px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>✅ URL Successfully Indexed</h1>
+    </div>
+
+    <div class="content">
+      <p class="greeting">Hi ${data.userName},</p>
+
+      <div class="success-box">
+        <strong>✅ Good news!</strong> A URL in your project <strong>${data.projectName}</strong> is now indexed by Google.
+      </div>
+
+      <p><strong>URL:</strong></p>
+      <div class="url-display">${data.url}</div>
+
+      <p><strong>Status Change:</strong></p>
+      <div class="status-badge">
+        ${data.previousState} → indexed
+      </div>
+
+      <p><strong>Detected at:</strong> ${data.detectedAt}</p>
+
+      <p>This URL is now appearing in Google's search index and can be discovered through search results.</p>
+
+      <div style="text-align: center;">
+        <a href="${data.dashboardUrl}" class="button">View Dashboard →</a>
+      </div>
+
+      <div class="footer">
+        <p>Indexing Insight Clone - Indexing Alert</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim()
+}
+
+interface ErrorDetectedEmailData {
+  userName: string
+  projectName: string
+  url: string
+  errorMessage: string
+  detectedAt: string
+  dashboardUrl: string
+}
+
+export function generateErrorDetectedEmail(data: ErrorDetectedEmailData): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indexing Error Detected</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .email-container {
+      background-color: #ffffff;
+      margin: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .warning-box {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .url-display {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .error-message {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      color: #991b1b;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .button {
+      display: inline-block;
+      background: #2563eb;
+      color: white !important;
+      padding: 14px 28px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>⚠️ Indexing Error Detected</h1>
+    </div>
+
+    <div class="content">
+      <p class="greeting">Hi ${data.userName},</p>
+
+      <div class="warning-box">
+        <strong>⚠️ Warning:</strong> An indexing error has been detected for a URL in your project <strong>${data.projectName}</strong>.
+      </div>
+
+      <p><strong>Affected URL:</strong></p>
+      <div class="url-display">${data.url}</div>
+
+      <p><strong>Error Details:</strong></p>
+      <div class="error-message">${data.errorMessage}</div>
+
+      <p><strong>Detected at:</strong> ${data.detectedAt}</p>
+
+      <p><strong>Common causes and fixes:</strong></p>
+      <ul>
+        <li><strong>404 errors:</strong> Check if the page exists and is accessible</li>
+        <li><strong>Redirect issues:</strong> Verify redirect chains and target URLs</li>
+        <li><strong>Server errors:</strong> Check server logs and fix 5xx errors</li>
+        <li><strong>Crawl errors:</strong> Review robots.txt and crawl settings</li>
+        <li><strong>Content issues:</strong> Ensure page has sufficient content</li>
+      </ul>
+
+      <div style="text-align: center;">
+        <a href="${data.dashboardUrl}" class="button">Investigate Issue →</a>
+      </div>
+
+      <div class="footer">
+        <p>Indexing Insight Clone - Error Alert</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim()
+}

@@ -23,6 +23,7 @@ model User {
   updatedAt              DateTime  @updatedAt
 
   accounts               Account[]
+  savedFilters           SavedFilter[]
   sessions               Session[]
   projects               Project[]
 
@@ -84,6 +85,7 @@ model Project {
   user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   urls                   Url[]
   alerts                 Alert[]
+  savedFilters           SavedFilter[]
 
   @@map("projects")
 }
@@ -263,4 +265,24 @@ model MonitoringQueue {
   @@index([status])
   @@index([scheduledAt])
   @@map("monitoring_queue")
+}
+
+// SavedFilter model - for saving filter presets
+model SavedFilter {
+  id          String   @id @default(cuid())
+  projectId   String
+  userId      String
+  name        String
+  description String?
+  filterData  Json     // Stores filter criteria
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+  @@map("saved_filters")
 }

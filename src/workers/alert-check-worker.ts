@@ -3,7 +3,7 @@ import { connection } from '@/lib/queue/connection'
 import { QUEUE_NAMES } from '@/lib/queue/types'
 import type { AlertCheckJobData } from '@/lib/queue/types'
 import { prisma } from '@/lib/db/prisma'
-import { sendUrlDroppedAlert } from '@/lib/email/alerts'
+import { sendUrlDroppedAlert, sendUrlIndexedAlert, sendErrorDetectedAlert } from '@/lib/email/alerts'
 import { IndexingState } from '@prisma/client'
 
 export const alertCheckWorker = new Worker<AlertCheckJobData>(
@@ -75,6 +75,26 @@ export const alertCheckWorker = new Worker<AlertCheckJobData>(
               detectedAt: change.changedAt,
               projectId,
             })
+          } else if (rule.alertType === 'url_indexed') {
+            await sendUrlIndexedAlert({
+              email: change.url.project.user.email,
+              userName: change.url.project.user.name || 'User',
+              projectName: change.url.project.name,
+              url: change.url.url,
+              previousState: change.oldState,
+              detectedAt: change.changedAt,
+              projectId,
+            })
+          } else if (rule.alertType === 'error_detected') {
+            await sendErrorDetectedAlert({
+              email: change.url.project.user.email,
+              userName: change.url.project.user.name || 'User',
+              projectName: change.url.project.name,
+              url: change.url.url,
+              errorMessage: change.newVerdict || 'Indexing error detected',
+              detectedAt: change.changedAt,
+              projectId,
+            })
           }
 
           // Record alert history
@@ -132,9 +152,20 @@ function evaluateAlertRule(rule: any, change: any): boolean {
         change.newState !== IndexingState.indexed
       )
 
+    case 'url_indexed':
+      // Alert if URL went from not indexed to indexed
+      return (
+        change.oldState !== IndexingState.indexed &&
+        change.newState === IndexingState.indexed
+      )
+
     case 'error_detected':
-      // Alert if new state is error or not_indexed
-      return change.newState === IndexingState.not_indexed
+      // Alert if new state is not_indexed with error message
+      return (
+        change.newState === IndexingState.not_indexed &&
+        change.newVerdict !== null &&
+        change.newVerdict !== ''
+      )
 
     case 'bulk_drop':
       // This would be handled separately in a bulk analysis job

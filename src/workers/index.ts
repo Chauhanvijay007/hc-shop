@@ -1,11 +1,13 @@
 /**
- * Worker Manager - Phase 2
+ * Worker Manager - Phase 2 & 3
  * Starts all background workers and schedulers
  */
 
 import urlInspectionWorker from './url-inspection-worker'
 import bulkCheckWorker from './bulk-check-worker'
 import alertCheckWorker from './alert-check-worker'
+import dailyReportWorker from './daily-report-worker'
+import weeklyReportWorker from './weekly-report-worker'
 import { startDailyMonitor, stopDailyMonitor, getNextDailyRun } from '@/lib/scheduler/daily-monitor'
 import { startWeeklyMonitor, stopWeeklyMonitor, getNextWeeklyRun } from '@/lib/scheduler/weekly-monitor'
 import { connection } from '@/lib/queue/connection'
@@ -18,6 +20,8 @@ const workers = [
   { name: 'URL Inspection Worker', instance: urlInspectionWorker },
   { name: 'Bulk Check Worker', instance: bulkCheckWorker },
   { name: 'Alert Check Worker', instance: alertCheckWorker },
+  { name: 'Daily Report Worker', instance: dailyReportWorker },
+  { name: 'Weekly Report Worker', instance: weeklyReportWorker },
 ]
 
 console.log(`\n✅ ${workers.length} workers started:`)
