@@ -1,0 +1,265 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  name                   String?
+  emailVerified          DateTime?
+  image                  String?
+  googleOAuthToken       String?   @db.Text // encrypted
+  googleRefreshToken     String?   @db.Text // encrypted
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  accounts               Account[]
+  sessions               Session[]
+  projects               Project[]
+
+  @@map("users")
+}
+
+// NextAuth Account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// NextAuth Session model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// NextAuth VerificationToken model
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+// Project model
+model Project {
+  id                     String   @id @default(cuid())
+  userId                 String
+  name                   String
+  domain                 String
+  searchConsoleProperty  String
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  urls                   Url[]
+  alerts                 Alert[]
+
+  @@map("projects")
+}
+
+enum Priority {
+  high
+  medium
+  low
+}
+
+enum MonitoringFrequency {
+  daily
+  weekly
+  custom
+}
+
+// URL model
+model Url {
+  id                   String              @id @default(cuid())
+  projectId            String
+  url                  String              @db.Text
+  urlHash              String              // for faster lookups
+  priority             Priority            @default(medium)
+  tags                 String[]
+  groups               String[]
+  sitemapUrl           String?             @db.Text
+  monitoringFrequency  MonitoringFrequency @default(daily)
+  isActive             Boolean             @default(true)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  project              Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  indexingChecks       IndexingCheck[]
+  statusChanges        StatusChange[]
+  alertHistory         AlertHistory[]
+  monitoringQueue      MonitoringQueue[]
+
+  @@unique([projectId, urlHash])
+  @@index([projectId])
+  @@index([urlHash])
+  @@index([isActive])
+  @@map("urls")
+}
+
+enum IndexingState {
+  indexed
+  not_indexed
+  discovered
+  unknown
+}
+
+enum CoverageState {
+  valid
+  excluded
+  error
+  unknown
+}
+
+// IndexingCheck model (time-series data)
+model IndexingCheck {
+  id                 String         @id @default(cuid())
+  urlId              String
+  checkedAt          DateTime       @default(now())
+  indexingState      IndexingState
+  coverageState      CoverageState
+  verdict            String?        @db.Text
+  lastCrawlTime      DateTime?
+  crawlAllowed       Boolean?
+  pageFetchState     String?
+  robotsTxtState     String?
+  userCanonical      String?        @db.Text
+  googleCanonical    String?        @db.Text
+  sitemapDetected    String?        @db.Text
+  referringUrl       String?        @db.Text
+  mobileUsability    String?        @db.Text
+  richResults        Json?
+  rawApiResponse     Json
+  errorMessage       String?        @db.Text
+
+  url                Url            @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  @@index([urlId])
+  @@index([checkedAt])
+  @@index([indexingState])
+  @@index([coverageState])
+  @@map("indexing_checks")
+}
+
+// StatusChange model
+model StatusChange {
+  id          String    @id @default(cuid())
+  urlId       String
+  changedAt   DateTime  @default(now())
+  oldState    String
+  newState    String
+  oldVerdict  String?   @db.Text
+  newVerdict  String?   @db.Text
+  notified    Boolean   @default(false)
+
+  url         Url       @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  @@index([urlId])
+  @@index([changedAt])
+  @@index([notified])
+  @@map("status_changes")
+}
+
+enum AlertType {
+  url_dropped
+  error_detected
+  bulk_drop
+  not_indexed_duration
+  specific_error
+}
+
+// Alert model
+model Alert {
+  id                   String         @id @default(cuid())
+  projectId            String
+  alertType            AlertType
+  triggerCondition     Json
+  notificationChannels String[]
+  isActive             Boolean        @default(true)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  project              Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  alertHistory         AlertHistory[]
+
+  @@index([projectId])
+  @@index([isActive])
+  @@map("alerts")
+}
+
+// AlertHistory model
+model AlertHistory {
+  id               String    @id @default(cuid())
+  alertId          String
+  urlId            String?
+  triggeredAt      DateTime  @default(now())
+  notificationSent Boolean   @default(false)
+  acknowledged     Boolean   @default(false)
+  alertData        Json
+
+  alert            Alert     @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  url              Url?      @relation(fields: [urlId], references: [id], onDelete: SetNull)
+
+  @@index([alertId])
+  @@index([urlId])
+  @@index([triggeredAt])
+  @@index([acknowledged])
+  @@map("alert_history")
+}
+
+enum QueueStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+// MonitoringQueue model
+model MonitoringQueue {
+  id           String       @id @default(cuid())
+  urlId        String
+  scheduledAt  DateTime     @default(now())
+  startedAt    DateTime?
+  completedAt  DateTime?
+  status       QueueStatus  @default(pending)
+  errorMessage String?      @db.Text
+  retryCount   Int          @default(0)
+
+  url          Url          @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  @@index([urlId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("monitoring_queue")
+}
