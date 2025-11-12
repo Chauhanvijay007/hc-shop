@@ -10,6 +10,8 @@ import dailyReportWorker from './daily-report-worker'
 import weeklyReportWorker from './weekly-report-worker'
 import { startDailyMonitor, stopDailyMonitor, getNextDailyRun } from '@/lib/scheduler/daily-monitor'
 import { startWeeklyMonitor, stopWeeklyMonitor, getNextWeeklyRun } from '@/lib/scheduler/weekly-monitor'
+import { startDailyReport, stopDailyReport, getNextDailyReportRun } from '@/lib/scheduler/daily-report'
+import { startWeeklyReport, stopWeeklyReport, getNextWeeklyReportRun } from '@/lib/scheduler/weekly-report'
 import { connection } from '@/lib/queue/connection'
 
 console.log('🚀 Starting Indexing Insight Workers...')
@@ -31,12 +33,18 @@ workers.forEach(w => console.log(`   - ${w.name}`))
 console.log('\n📅 Starting schedulers...')
 startDailyMonitor()
 startWeeklyMonitor()
+startDailyReport()
+startWeeklyReport()
 
 // Log next scheduled runs
 const nextDaily = getNextDailyRun()
 const nextWeekly = getNextWeeklyRun()
+const nextDailyReport = getNextDailyReportRun()
+const nextWeeklyReport = getNextWeeklyReportRun()
 console.log(`   - Daily monitoring: next run at ${nextDaily.toLocaleString()}`)
 console.log(`   - Weekly monitoring: next run at ${nextWeekly.toLocaleString()}`)
+console.log(`   - Daily report: next run at ${nextDailyReport.toLocaleString()}`)
+console.log(`   - Weekly report: next run at ${nextWeeklyReport.toLocaleString()}`)
 
 console.log('\n✅ All workers and schedulers are running!')
 console.log('=====================================')
@@ -51,6 +59,8 @@ async function shutdown(signal: string) {
   console.log('🛑 Stopping schedulers...')
   stopDailyMonitor()
   stopWeeklyMonitor()
+  stopDailyReport()
+  stopWeeklyReport()
 
   // Close all workers
   console.log('🛑 Closing workers...')
