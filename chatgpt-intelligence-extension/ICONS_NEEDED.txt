@@ -1,0 +1,43 @@
+⚠️ ICONS REQUIRED FOR EXTENSION TO LOAD ⚠️
+
+The extension requires three icon files to work properly:
+
+1. icons/icon16.png  (16x16 pixels)
+2. icons/icon48.png  (48x48 pixels)
+3. icons/icon128.png (128x128 pixels)
+
+QUICK FIX:
+----------
+For testing, you can use ANY three square PNG images:
+
+1. Find 3 PNG images (any images will work)
+2. Resize them to 16x16, 48x48, and 128x128
+3. Name them exactly as shown above
+4. Place in the icons/ folder
+
+RECOMMENDED APPROACH:
+--------------------
+1. Use the icon.svg template in icons/ folder
+2. Convert to PNG using:
+   - CloudConvert: https://cloudconvert.com/svg-to-png
+   - Or any SVG to PNG converter
+3. Export at all three sizes
+
+PROFESSIONAL APPROACH:
+---------------------
+1. Create custom icons using:
+   - Figma: https://figma.com
+   - Canva: https://canva.com
+   - Photoshop/GIMP
+
+2. Use the extension colors:
+   - Primary: #667eea
+   - Secondary: #764ba2
+
+3. Icon ideas:
+   - Magnifying glass with circuit pattern
+   - Brain with analytics symbol
+   - Chart/graph icon
+   - Eye symbol with data streams
+
+Without these icons, Chrome will show an error when loading the extension!
