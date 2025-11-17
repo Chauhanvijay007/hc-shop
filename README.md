@@ -11,22 +11,35 @@ A comprehensive Google Search Console (GSC) analytics platform built with Next.j
 - **Data Visualization:** Recharts
 - **State Management:** TanStack Query (React Query)
 
-## Features (Phase 1 - MVP)
+## Features (Phase 1 - MVP) ✅ COMPLETE
 
-### ✅ Implemented
-- Google OAuth authentication with GSC API access
-- Multi-site property management
-- Master dashboard with property overview
-- GSC data integration service
-- Property connection flow
-- User authentication and session management
-- Responsive dashboard UI
+### Core Features
+- ✅ Google OAuth authentication with GSC API access
+- ✅ Multi-site property management
+- ✅ Master dashboard with property overview
+- ✅ GSC data integration service (batch fetching up to 50k rows)
+- ✅ Property connection flow with tags and branded keywords
+- ✅ User authentication and session management
+- ✅ Responsive dashboard UI with sidebar navigation
 
-### 🚧 In Development
-- Timeline chart with clicks/impressions/CTR/position
-- Data sync background jobs
-- Basic filtering (date, device, country)
-- CSV export functionality
+### Analytics & Visualization
+- ✅ Timeline chart with Recharts (clicks, impressions, CTR, position)
+- ✅ Interactive metric toggling
+- ✅ Property detail pages with key metrics
+- ✅ Daily snapshot aggregations
+
+### Filtering & Export
+- ✅ Date range filtering (7d, 30d, 90d, 6m, 1y)
+- ✅ Device filtering (desktop, mobile, tablet)
+- ✅ Country filtering
+- ✅ CSV export functionality (up to 50k rows)
+- ✅ Downloadable analytics data
+
+### Background Jobs
+- ✅ Automated data sync system (Vercel Cron)
+- ✅ Manual sync trigger
+- ✅ Sync queue management
+- ✅ Job status tracking
 
 ### 📋 Planned (Future Phases)
 - Content Groups
@@ -145,21 +158,32 @@ The application uses PostgreSQL with the following main models:
 ### Properties
 - `GET /api/properties` - List user properties
 - `POST /api/properties` - Add new property
-- `GET /api/gsc/properties` - Fetch GSC properties
-- `POST /api/gsc/sync` - Sync property data
+- `GET /api/properties/[id]` - Get property details with stats
+- `GET /api/gsc/properties` - Fetch GSC properties from Google
+- `POST /api/gsc/sync` - Sync property data from GSC
+
+### Analytics
+- `GET /api/analytics/timeline` - Get timeline chart data with filters
+
+### Export
+- `POST /api/export/csv` - Export data to CSV
+
+### Background Jobs
+- `GET /api/cron/sync` - Automated sync endpoint (cron job)
+- `GET /api/sync/status/[jobId]` - Check sync job status
 
 ## Development Roadmap
 
-### Phase 1: MVP (Current) ✅
+### Phase 1: MVP ✅ COMPLETED
 - [x] Authentication (Google OAuth)
 - [x] Connect GSC properties
 - [x] Basic dashboard
 - [x] Property management
 - [x] GSC API integration
-- [ ] Timeline chart
-- [ ] Data sync job
-- [ ] Basic filtering
-- [ ] CSV export
+- [x] Timeline chart
+- [x] Data sync job
+- [x] Basic filtering
+- [x] CSV export
 
 ### Phase 2: Enhanced Analytics
 - [ ] Content Groups
