@@ -31,6 +31,9 @@ model User {
   contentGroups ContentGroup[]
   topicClusters TopicCluster[]
   seoTests      SeoTest[]
+  alerts        Alert[]
+  alertRules    AlertRule[]
+  reports       Report[]
   magicLinks    MagicLink[]
   teamMembers   TeamMember[]
 
@@ -80,26 +83,28 @@ model VerificationToken {
 // ============================================
 
 model Property {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String
   siteUrl         String
   displayName     String?
-  tags            String[] @default([])
-  isFavorite      Boolean  @default(false)
-  isHidden        Boolean  @default(false)
-  brandedKeywords String[] @default([])
+  tags            String[]  @default([])
+  isFavorite      Boolean   @default(false)
+  isHidden        Boolean   @default(false)
+  brandedKeywords String[]  @default([])
   lastSyncedAt    DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  analyticsData   AnalyticsData[]
-  dailySnapshots  DailySnapshot[]
-  contentGroups   ContentGroup[]
-  topicClusters   TopicCluster[]
-  annotations     Annotation[]
-  seoTests        SeoTest[]
-  teamMembers     TeamMember[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyticsData  AnalyticsData[]
+  dailySnapshots DailySnapshot[]
+  contentGroups  ContentGroup[]
+  topicClusters  TopicCluster[]
+  annotations    Annotation[]
+  seoTests       SeoTest[]
+  alerts         Alert[]
+  alertRules     AlertRule[]
+  teamMembers    TeamMember[]
 
   @@unique([userId, siteUrl])
   @@index([userId])
@@ -166,7 +171,7 @@ model ContentGroup {
   name        String
   description String?
   color       String   @default("#3b82f6")
-  conditions  Json     // Array of condition objects
+  conditions  Json // Array of condition objects
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -266,6 +271,55 @@ model SeoTest {
 }
 
 // ============================================
+// Alerts & Notifications
+// ============================================
+
+model Alert {
+  id          String   @id @default(cuid())
+  userId      String
+  propertyId  String?
+  type        String // rank_drop, rank_gain, traffic_drop, traffic_spike, ctr_drop, error_spike
+  severity    String   @default("medium") // low, medium, high
+  title       String
+  message     String
+  threshold   Json? // Alert configuration/thresholds
+  triggeredBy Json? // Data that triggered the alert
+  isRead      Boolean  @default(false)
+  isMuted     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model AlertRule {
+  id          String   @id @default(cuid())
+  userId      String
+  propertyId  String?
+  name        String
+  type        String // rank_drop, rank_gain, traffic_drop, traffic_spike, ctr_drop, error_spike
+  isEnabled   Boolean  @default(true)
+  config      Json // Rule configuration (thresholds, conditions, etc.)
+  notifyEmail Boolean  @default(true)
+  notifyApp   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([isEnabled])
+}
+
+// ============================================
 // Magic Links (Client Portals)
 // ============================================
 
@@ -306,4 +360,30 @@ model TeamMember {
   @@unique([userId, propertyId])
   @@index([userId])
   @@index([propertyId])
+}
+
+// ============================================
+// Reports & Scheduled Reports
+// ============================================
+
+model Report {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  type        String // custom, traffic, keywords, pages, content_groups
+  config      Json // Report configuration (metrics, filters, grouping)
+  schedule    String    @default("manual") // manual, daily, weekly, monthly
+  nextRun     DateTime?
+  isEnabled   Boolean   @default(true)
+  recipients  String[]  @default([]) // Email addresses for scheduled reports
+  format      String    @default("pdf") // pdf, csv, json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([schedule])
+  @@index([nextRun])
 }
