@@ -164,6 +164,31 @@ The application uses PostgreSQL with the following main models:
 
 ### Analytics
 - `GET /api/analytics/timeline` - Get timeline chart data with filters
+- `GET /api/analytics/branded` - Get branded vs non-branded analytics
+
+### Content Groups
+- `GET /api/content-groups` - List content groups
+- `POST /api/content-groups` - Create content group
+- `GET /api/content-groups/[id]` - Get content group
+- `PUT /api/content-groups/[id]` - Update content group
+- `DELETE /api/content-groups/[id]` - Delete content group
+
+### Topic Clusters
+- `GET /api/topic-clusters` - List topic clusters
+- `POST /api/topic-clusters` - Create topic cluster
+- `GET /api/topic-clusters/[id]` - Get cluster with stats
+- `PUT /api/topic-clusters/[id]` - Update cluster
+- `DELETE /api/topic-clusters/[id]` - Delete cluster
+
+### Saved Filters
+- `GET /api/filters` - List saved filters
+- `POST /api/filters` - Create saved filter
+
+### Annotations
+- `GET /api/annotations` - List annotations
+- `POST /api/annotations` - Create annotation
+- `PUT /api/annotations/[id]` - Update annotation
+- `DELETE /api/annotations/[id]` - Delete annotation
 
 ### Export
 - `POST /api/export/csv` - Export data to CSV
@@ -185,12 +210,12 @@ The application uses PostgreSQL with the following main models:
 - [x] Basic filtering
 - [x] CSV export
 
-### Phase 2: Enhanced Analytics
-- [ ] Content Groups
-- [ ] Topic Clusters
-- [ ] Branded vs Non-branded tracking
-- [ ] Saved filters
-- [ ] Custom annotations
+### Phase 2: Enhanced Analytics ✅ COMPLETED
+- [x] Content Groups (URL pattern matching with visual builder)
+- [x] Topic Clusters (Keyword grouping and management)
+- [x] Branded vs Non-branded tracking (Separate analytics)
+- [x] Saved filters (Save and reuse filter combinations)
+- [x] Custom annotations (Timeline annotations with types)
 
 ### Phase 3: Advanced Reports
 - [ ] Heatmap Overview
