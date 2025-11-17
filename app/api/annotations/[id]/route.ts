@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // PUT - Update an annotation
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { date, title, description, type, isShared } = body;
 
     // Verify ownership
     const existing = await prisma.annotation.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     });
@@ -35,7 +35,7 @@ export async function PUT(
 
     const annotation = await prisma.annotation.update({
       where: {
-        id: params.id,
+        id: id,
       },
       data: {
         date: date ? new Date(date) : undefined,
@@ -59,19 +59,21 @@ export async function PUT(
 // DELETE - Delete an annotation
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify ownership
     const existing = await prisma.annotation.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     });
@@ -85,7 +87,7 @@ export async function DELETE(
 
     await prisma.annotation.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 

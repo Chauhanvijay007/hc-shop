@@ -88,7 +88,6 @@ export async function GET(request: NextRequest) {
     console.log("Sync completed:", results);
 
     return NextResponse.json({
-      success: true,
       ...results,
       timestamp: new Date().toISOString(),
     });

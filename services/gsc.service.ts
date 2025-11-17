@@ -22,7 +22,7 @@ interface SearchAnalyticsRow {
 export class GSCService {
   private oauth2Client;
 
-  constructor(accessToken: string, refreshToken?: string) {
+  constructor(accessToken: string, refreshToken?: string | null) {
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -31,7 +31,7 @@ export class GSCService {
 
     this.oauth2Client.setCredentials({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: refreshToken ?? undefined,
     });
   }
 
@@ -69,7 +69,7 @@ export class GSCService {
         },
       });
 
-      return response.data.rows || [];
+      return (response.data.rows || []) as SearchAnalyticsRow[];
     } catch (error) {
       console.error("Error fetching search analytics:", error);
       throw new Error("Failed to fetch search analytics data");
@@ -211,7 +211,7 @@ export class GSCService {
   /**
    * Get fresh access token using refresh token
    */
-  static async refreshAccessToken(refreshToken: string) {
+  static async refreshAccessToken(refreshToken: string): Promise<string> {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -224,6 +224,9 @@ export class GSCService {
 
     try {
       const { credentials } = await oauth2Client.refreshAccessToken();
+      if (!credentials.access_token) {
+        throw new Error("No access token returned from refresh");
+      }
       return credentials.access_token;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -263,5 +266,5 @@ export async function getGSCServiceForUser(userId: string): Promise<GSCService> 
     throw new Error("Token expired and no refresh token available");
   }
 
-  return new GSCService(account.access_token, account.refresh_token || undefined);
+  return new GSCService(account.access_token, account.refresh_token);
 }

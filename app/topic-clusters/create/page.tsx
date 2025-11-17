@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
@@ -19,7 +20,14 @@ async function createTopicCluster(data: any) {
 }
 
 export default function CreateTopicClusterPage() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <PageContent />
+    </Suspense>
+  );
+}
+
+function PageContent() {  const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get("propertyId");
 

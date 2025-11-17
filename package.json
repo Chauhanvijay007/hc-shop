@@ -19,6 +19,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^6.19.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.10",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
