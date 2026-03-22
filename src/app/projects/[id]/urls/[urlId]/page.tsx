@@ -5,12 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { format } from 'date-fns'
-import { ArrowLeft, CheckCircle, Clock, Globe, AlertCircle } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 interface UrlDetail {
   id: string

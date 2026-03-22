@@ -5,9 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Activity, AlertTriangle, CheckCircle, Clock, Globe, XCircle } from 'lucide-react'
+import { AlertTriangle, XCircle } from 'lucide-react'
 
 interface CrawlSummary {
   totalUrls: number

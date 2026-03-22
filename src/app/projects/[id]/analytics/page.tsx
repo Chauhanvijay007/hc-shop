@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts'
@@ -101,7 +100,6 @@ function IndexedPctChart({ data }: { data: SegmentData[] }) {
 
 export default function AnalyticsPage() {
   const params = useParams()
-  const router = useRouter()
   const projectId = params.id as string
 
   const [data, setData] = useState<SegmentsResponse | null>(null)

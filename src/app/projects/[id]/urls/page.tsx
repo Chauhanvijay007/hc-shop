@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { ProjectNav } from '@/components/layout/project-nav'
 import { Button } from '@/components/ui/button'
@@ -57,7 +57,7 @@ function UrlRowSkeleton() {
   )
 }
 
-export default function UrlsPage() {
+function UrlsContent() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -368,5 +368,13 @@ export default function UrlsPage() {
         </Card>
       </main>
     </div>
+  )
+}
+
+export default function UrlsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading…</div>}>
+      <UrlsContent />
+    </Suspense>
   )
 }
