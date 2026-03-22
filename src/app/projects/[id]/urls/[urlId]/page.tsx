@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -112,24 +113,22 @@ export default function UrlDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => router.push(`/projects/${projectId}/urls`)}>
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to URLs
-            </Button>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">{urlData.project.name}</p>
-              <h1 className="text-sm font-mono font-medium truncate">{urlData.url}</h1>
-            </div>
-            <div className="flex items-center gap-2">
+      <ProjectNav projectId={projectId} />
+      {/* URL breadcrumb bar */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={() => router.push(`/projects/${projectId}/urls`)} className="text-muted-foreground hover:text-gray-900 flex-shrink-0">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <p className="text-sm font-mono truncate text-gray-700">{urlData.url}</p>
+            <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
               {latestCheck && stateBadge(latestCheck.indexingState)}
               <Badge variant="outline" className="capitalize">{urlData.priority}</Badge>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

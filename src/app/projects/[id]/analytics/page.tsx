@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -126,24 +127,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => router.push('/dashboard')}>
-                ← Dashboard
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold">Segmentation Analytics</h1>
-                <p className="text-sm text-muted-foreground">Indexing performance by priority, tags, and groups</p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => router.push(`/projects/${projectId}/crawl-analysis`)}>
-              Crawl Budget Analysis
-            </Button>
-          </div>
-        </div>
-      </header>
+      <ProjectNav projectId={projectId} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Priority Summary Cards */}

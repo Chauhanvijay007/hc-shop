@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { ProjectNav } from '@/components/layout/project-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -84,24 +85,7 @@ export default function CrawlAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => router.push('/dashboard')}>
-                ← Dashboard
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold">Crawl Budget Analysis</h1>
-                <p className="text-sm text-muted-foreground">Understand how Google crawls your URLs</p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => router.push(`/projects/${projectId}/analytics`)}>
-              Segmentation Analytics
-            </Button>
-          </div>
-        </div>
-      </header>
+      <ProjectNav projectId={projectId} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Summary Cards */}
